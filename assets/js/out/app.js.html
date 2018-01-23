@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: app.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: app.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/*jshint esversion:6*/
+/** @namespace */
+var app = (function (){
+  "use strict";
+
+  /*###### PARTIE DECLARATION DES VARIABLES */
+  let id = 1; //Servira pour l'id unique
+  let productName = "prod" + id;
+  let stockArray = [{ref:100, name:"apple",desc:"Pour le dev &amp; autre", color:"gris", price:2000},{ref:101, name:"pc",desc:"Pour le game &amp; autre", color:"noir", price:1490}];
+  //let stockArray = [];
+
+  /**
+   * Constructor qui va nous servir à créer les objets
+   * @alias app.Produit
+   * @param       {Object} prod La ref est automatique &amp; on attend les 4 autres paramètres
+   * @constructor
+   */
+  let Produit = function Produit(prod){
+
+    if (!(this instanceof Produit)) {
+      throw new Error("Alors comme ça on oublie le mot clé 'new' ??!!");
+    }
+      this.ref = prod.ref;
+      this.name = prod.name;
+      this.desc = prod.desc;
+      this.color = prod.color;
+      this.price = prod.price;
+  };
+
+  /**
+   * Fonction principale qui va appeler les autres
+   * @alias app.start
+   * @return {undefined} Renvoi rien
+   */
+  const start = function (){
+    let elem = document.getElementById("addProductBtn");
+    elem.addEventListener("click", function(){
+      addNewProduct();
+      //viewProduct();
+    });
+  };
+
+
+/**
+ * Fonction ajouter nouveau produit avec check sur les nom &amp; les prix, les autres param sont optionnels
+ * @alias app.addNewProduct
+ * @return {undefined} Renvoi rien
+ */
+
+//receiveVarXX -> pour les variable venant du formulaire
+  function addNewProduct(){
+    let receiveName   = document.getElementById("name");
+    let receiveDesc   = document.getElementById("desc");
+    let receiveColor  = document.getElementById("color");
+    let receivePrice  = document.getElementById("price");
+
+    //checks
+    let nameChecked="",priceChecked="";
+    if (receiveName.value === "") {
+      document.getElementById("msgName").innerHTML = "Champ obligatoire";
+      receiveName.style.border = "2px solid #D11D05";
+    } else {
+      nameChecked = receiveName.value.trim();
+      document.getElementById("msgName").innerHTML = "";
+      receiveName.style.border = "";
+    }
+
+    if (isNaN(receivePrice.value) || (receivePrice.value === "") ) {
+        if(receivePrice.value === ""){
+          document.getElementById("msgPrice").innerHTML = "le champ ne doit pas être vide";
+          receivePrice.style.border = "2px solid #D11D05";
+        }
+        if(isNaN(receivePrice.value)){
+          document.getElementById("msgPrice").innerHTML = "le champ doit être un nombre";
+          receivePrice.style.border = "2px solid #D11D05";
+        }
+
+    } else {
+      priceChecked = receivePrice.value.trim();
+      document.getElementById("msgPrice").innerHTML = "";
+      receivePrice.style.border = "";
+    }
+
+    //On crèe l'instance et on l'enregistre dans le tableau
+    if ((nameChecked !== "") &amp;&amp; priceChecked !== ""){
+    productName = new Produit({
+        ref  : id,
+        name : nameChecked,//Trim() retire les blancs en début et fin de chaine
+        desc : receiveDesc.value,
+        color: receiveColor.value,
+        price: priceChecked
+    });
+    id += 1;
+    stockArray.push(productName);
+    // On réinitialise les champs
+    receiveName.value = "";
+    receiveDesc.value = "";
+    receiveColor.value = "";
+    receivePrice.value = "";
+    }
+    viewProduct();
+  }
+
+/**
+ * Fonction d'affichage des produits.contenu dans le tableau
+ * @alias app.viewProduct
+ * @return {undefined}
+ */
+  function viewProduct(){
+    let designRow = document.getElementById("afficher");
+      if (stockArray.length >= 0){
+        designRow.innerHTML = ""; //Vider avant d'afficher
+        for (let i=0; i &lt; stockArray.length; i++){
+          designRow.innerHTML += `
+          &lt;tr class="line">
+            &lt;td>${stockArray[i].name}&lt;/td>
+            &lt;td>${stockArray[i].desc}&lt;/td>
+            &lt;td>${stockArray[i].color}&lt;/td>
+            &lt;td>${stockArray[i].price}&lt;/td>
+            &lt;td>&lt;i id="updtBtn" class="fa fa-pencil-square-o selected" aria-hidden="true" onclick="app.updateItem(${i})">&lt;/i>&lt;/td>
+            &lt;td>&lt;i id="supprBtn" class="fa fa-trash-o" aria-hidden="true" onclick="app.deleteItem(${i})" >&lt;/i>&lt;/td>
+          &lt;/tr>`;
+        }
+      }
+  }
+
+/**
+ * Fonction de suppression de ligne
+ * @alias app.deleteItem
+ * @param  {number} num On récupère le numéro index au click
+ * @return {undefined}  retourne rien
+ */
+ let deleteItem = (num) => {
+     stockArray.splice(num, 1);
+     viewProduct();
+   };
+
+   /**
+    * Fonction de modification de ligne
+    * @alias app.updateItem
+    * @param  {number} num On récupère le numéro index au click
+    * @return {undefined}  retourne rien
+    */
+let updateItem = (num) =>{
+
+  let trOnGoing = document.querySelectorAll(".line");// selection des tr
+  let countTD = trOnGoing[num].cells.length; //vaut 6
+  console.log(countTD);
+  console.log(trOnGoing[num]);
+  trOnGoing[num].cells[0].innerHTML = `&lt;input class="modify" id="updtName"type='text' value='${stockArray[num].name}'>`;
+  trOnGoing[num].cells[1].innerHTML = `&lt;input class="modify" id="updtDesc"type='text' value='${stockArray[num].desc}'>`;
+  trOnGoing[num].cells[2].innerHTML = `&lt;input class="modify" id="updtColor"type='text' value='${stockArray[num].color}'>`;
+  trOnGoing[num].cells[3].innerHTML = `&lt;input class="modify" id="updtPrice"type='text' value='${stockArray[num].price}'>`;
+  trOnGoing[num].cells[4].innerHTML = '&lt;i class="fa fa-check" aria-hidden="true" id="submit">&lt;/i>';
+  trOnGoing[num].cells[5].innerHTML = '&lt;i class="fa fa-times" aria-hidden="true" id="cancel">&lt;/i';
+
+  // Pour désactiver les autres boutons modifier
+  var totaBtnAfterClick = document.querySelectorAll(".selected");
+  for (let i=0; i &lt; totaBtnAfterClick.length; i++){
+    totaBtnAfterClick[i].onclick="";
+  }
+
+  document.getElementById("cancel").addEventListener("click", function(){
+      viewProduct();
+  });
+
+  document.getElementById("submit").addEventListener("click", function(){
+        stockArray[num].name = updtName.value;
+        stockArray[num].desc = updtDesc.value;
+        stockArray[num].color = updtColor.value;
+        stockArray[num].price = updtPrice.value;
+      viewProduct();
+
+  });
+};
+
+  window.onload = function (){
+    start();
+    viewProduct();
+
+  };
+  return {
+    //On renvoi les fonctions pour pouvoir les réutiliser
+    deleteItem:deleteItem,
+    updateItem:updateItem,
+    viewProduct
+  };
+}());
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="app.Produit.html">Produit</a></li></ul><h3>Namespaces</h3><ul><li><a href="app.html">app</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sun Nov 19 2017 20:58:01 GMT+0100 (CET)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
